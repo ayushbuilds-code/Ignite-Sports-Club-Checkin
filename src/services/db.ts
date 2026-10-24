@@ -1,13 +1,14 @@
 import { Team, ActivityLog, TournamentSettings } from '../types';
 import { INITIAL_SAMPLE_TEAMS, INITIAL_SAMPLE_ACTIVITY, INITIAL_TOURNAMENT_SETTINGS } from './sampleData';
 
-const DB_NAME = 'IgniteTournament_FreeFire_Official_2026';
+const DB_NAME = 'IgniteTournament_FreeFire_Dummy_2026';
 const DB_VERSION = 1;
 
-// Clean up old demo database if exists
+// Clean up old databases if exists
 try {
   if (typeof window !== 'undefined' && 'indexedDB' in window) {
     window.indexedDB.deleteDatabase('IgniteEsportsCheckIn_DB');
+    window.indexedDB.deleteDatabase('IgniteTournament_FreeFire_Official_2026');
   }
 } catch {
   // Ignore
@@ -59,7 +60,7 @@ class TournamentDatabase {
     return this.dbPromise;
   }
 
-  // Initialize and seed if empty or old demo data
+  // Initialize and seed if empty or old data
   async initialize(): Promise<void> {
     const db = await this.getDB();
     const tx = db.transaction([STORES.TEAMS, STORES.SETTINGS, STORES.ACTIVITY], 'readwrite');
@@ -70,8 +71,8 @@ class TournamentDatabase {
     const checkReq = teamsStore.get('IGN-01');
     checkReq.onsuccess = () => {
       const existing = checkReq.result as Team | undefined;
-      // If store is empty or has old sample team "Total Gaming Esports", seed the real tournament teams
-      if (!existing || existing.name === 'Total Gaming Esports') {
+      // If store is empty or has old data (VOID REAPERS, Total Gaming, etc.), reseed with dummy data
+      if (!existing || existing.name === 'Total Gaming Esports' || existing.name === 'VOID REAPERS' || existing.name !== 'PHOENIX ESPORTS') {
         teamsStore.clear();
         activityStore.clear();
         for (const team of INITIAL_SAMPLE_TEAMS) {
